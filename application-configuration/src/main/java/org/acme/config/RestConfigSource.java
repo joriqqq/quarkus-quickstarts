@@ -8,15 +8,17 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class ReloadableConfigSource implements ConfigSource {
+public class RestConfigSource  implements ConfigSource  {
 
-    private volatile Map<String, String> props = new HashMap<>();
+    protected static  Map<String, String> props = new HashMap<>();
 
-    public ReloadableConfigSource() {
-        this.props.put("greeting.name", "Bim");
+    public RestConfigSource() {
+        props.put("greeting.name", "Bim");
 
+        //singleton
         ScheduledExecutorService service = Executors.newScheduledThreadPool(5);
         service.scheduleAtFixedRate(this::refresh, 5, 50, TimeUnit.MILLISECONDS);
+        System.out.println(Thread.currentThread().getId() + " RestConfigSource created ");
     }
 
     @Override
@@ -41,7 +43,7 @@ public class ReloadableConfigSource implements ConfigSource {
         return val;
     }
 
-    void refresh() {
+    synchronized void refresh() {
         if ("Bim".equals(props.get("greeting.name"))) {
             props.put("greeting.name", "Bam");
             System.out.println(Thread.currentThread().getId() + " refreshed: Bam ");
